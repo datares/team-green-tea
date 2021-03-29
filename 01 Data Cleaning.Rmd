@@ -1,0 +1,115 @@
+---
+title: "01 Data Cleaning"
+author: "Tara Jaigopal"
+date: "2/15/2021"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(readr)
+```
+
+# Step 1: Reading in the Kaggle & Hass Avocado Board datasets
+
+```{r, message=FALSE, warning=FALSE}
+# Kaggle dataset (Jan 2015 - Mar 2018) 
+avo_kaggle <- read_csv("datasets [final]/avocado.csv")
+
+# HAB datasets (2017, 2018, 2019, 2020)
+avo_2017 <- read_csv("datasets [final]/2017-plu-total-hab-data.csv")
+avo_2018 <- read_csv("datasets [final]/2018-plu-total-hab-data.csv")
+avo_2019 <- read_csv("datasets [final]/2019-plu-total-hab-data.csv")
+avo_2020 <- read_csv("datasets [final]/2020-plu-total-hab-data.csv")
+```
+
+# Step 1.5: Some extra stuff to make our lives easier
+
+```{r, message=FALSE, warning=FALSE}
+# Joining all the HAB datasets
+avo_HAB <- rbind(avo_2017, avo_2018, avo_2019, avo_2020)
+
+# Subsetting the Kaggle dataset to include only pre-2017 data
+avo_kaggle <- filter(avo_kaggle, year < 2017)
+```
+
+# Step 2: Renaming Columns
+
+```{r, message=FALSE, warning=FALSE}
+# renaming columns of HAB 
+avo_HAB2 <- avo_HAB %>% rename(Region = Geography, 
+                               Date = "Current Year Week Ending", 
+                               AveragePrice = "ASP Current Year", 
+                               "4046" = "4046 Units", 
+                               "4225" = "4225 Units", 
+                               "4770" = "4770 Units", 
+                               "Total Bags" = "TotalBagged Units",
+                               "Small Bags" = "SmlBagged Units",
+                               "Large Bags" = "LrgBagged Units",
+                               "XLarge Bags" = "X-LrgBagged Units", 
+                               "Total Volume" = "Total Bulk and Bags Units") %>% select(-Timeframe)
+
+# subsetting + renaming columns of Kaggle
+avo_kaggle2 <- avo_kaggle %>% select(-X1, -year) %>% rename("Region" = "region", "Type" = "type")
+```
+
+# Step 3: Combining the two datasets 
+
+```{r, message=FALSE, warning=FALSE}
+# and also ensuring their type is listed similarly!
+avo_combined <- rbind(avo_HAB2, avo_kaggle2) %>% mutate(Type = tolower(Type))
+```
+
+# Step 4: Fixing the region 
+```{r, message=FALSE, warning=FALSE}
+avo_combined$Region %>% unique() %>% sort()
+# We have two issues: spaces & slashes 
+# Let's try & keep both! 
+
+# defining a replacement function
+replace_region <- function(x, y) {
+  avo_combined$Region[avo_combined$Region == x] <- y
+  return(avo_combined)
+} 
+
+# genuinely terrible code rn pls excuse me
+avo_combined <- replace_region("BaltimoreWashington", "Baltimore/Washington")
+
+
+avo_combined <-  replace_region("BuffaloRochester", "Buffalo/Rochester")
+avo_combined <-  replace_region("CincinnatiDayton", "Cincinnati/Dayton")
+avo_combined <-  replace_region("DallasFtWorth","Dallas/Ft. Worth") 
+avo_combined <-  replace_region("GrandRapids", "Grand Rapids")
+avo_combined <-  replace_region("GreatLakes", "Great Lakes")
+avo_combined <-  replace_region("HarrisburgScranton","Harrisburg/Scranton")
+avo_combined <-  replace_region("HartfordSpringfield","Hartford/Springfield")
+avo_combined <-  replace_region("LasVegas","Las Vegas")
+avo_combined <-  replace_region("LosAngeles","Los Angeles")
+avo_combined <-  replace_region("MiamiFtLauderdale","Miami/Ft. Lauderdale")
+avo_combined <-  replace_region("NewOrleansMobile","New Orleans/Mobile")
+avo_combined <-  replace_region("NewYork","New York")
+avo_combined <-  replace_region("NorthernNewEngland","Northern New England")
+avo_combined <-  replace_region("PhoenixTucson","Phoenix/Tucson")
+avo_combined <-  replace_region("RaleighGreensboro","Raleigh/Greensboro")
+avo_combined <-  replace_region("RichmondNorfolk","Richmond/Norfolk")
+avo_combined <-  replace_region("SanDiego","San Diego")
+avo_combined <-  replace_region("SanFrancisco","San Francisco")
+avo_combined <-  replace_region("SouthCarolina","South Carolina")
+avo_combined <-  replace_region("SouthCentral","South Central")
+avo_combined <-  replace_region("StLouis","St. Louis")
+avo_combined <-  replace_region("TotalUS","Total U.S.")
+avo_combined <- replace_region("WestTexNewMexico", "West Tex/New Mexico")
+
+avo_combined$Region %>% unique() %>% sort()
+```
+# Step 5: Saving the code
+```{r, message=FALSE, warning=FALSE}
+write.csv(avo_combined,"datasets [final]/avo_combined.csv", row.names = TRUE)
+```

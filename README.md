@@ -1,4 +1,4 @@
-# Everything You Avo Wanted to Know About Avocados 🥑🥑🥑
+# Everything You Avo Wanted to Know About Avocados 🥑
 
 Hailed in recent years as a trendy superfood, avocados have soared in popularity faster than you can say “holy guacamole!” They are as prized for their nutritious value as their delicious taste and versatility. Not to mention they come with possibly more health benefits than ways to prepare them! Loaded with a healthy monounsaturated fat called oleic acid—which has been shown to reduce inflammation, lower cholesterol, and protect against cancer—avocados are truly nature’s gift to humanity. 
 

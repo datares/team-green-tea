@@ -36,7 +36,7 @@ Since the data sourced from the Census Bureau and Kaiser Family Foundation provi
 
 # Analysis and Code
 
-Our data analysis and corresponding code can be found in our analysis folder. While we were able to choose any language or platform for our analysis, we mainly utilized R and Tableau to clean our data and create our visualizations. Hence, our analyses include both R code and Markdown files and Tableau notebooks and scripts. For R, some of the specific packages we used include matplotlib, seaborn, and plot.ly — to create interactive visualizations! 
+Our data analysis and corresponding code can be found in our analysis folder. While we were able to choose any language or platform for our analysis, we mainly utilized R and Tableau to clean our data and create our visualizations. Hence, our analyses include both R code and Markdown files and Tableau notebooks and scripts. For R, some of the specific packages we used include plot.ly — to create interactive visualizations! 
 
 ## Research Questions 
 

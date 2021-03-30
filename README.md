@@ -32,7 +32,22 @@ These divisions are presumably due to similarities in demographics and access to
 
 # Data Processing 
 
-However, since the data sourced from the Census Bureau and Kaiser Family Foundation provided figures related to health and demographics for each U.S. state rather than for each region, we transformed the data by using population-weighted aggregation to arrive at figures for each region. This enabled us to draw links between avocado consumption and the health and demographics of the population of each region. 
+Since the data sourced from the Census Bureau and Kaiser Family Foundation provided figures related to health and demographics for each U.S. state, rather than for each region, we transformed the data by using population-weighted aggregation to arrive at figures for each region. This enabled us to draw links between avocado consumption and the health and demographics of the population of each region. 
 
-Having readied our datasets, we delved into our analysis. 
+# Analysis and Code
+
+Our data analysis and corresponding code can be found in our analysis folder. While we were able to choose any language or platform for our analysis, we mainly utilized R and Tableau to clean our data and create our visualizations. Hence, our analyses include both R code and Markdown files and Tableau notebooks and scripts. For R, some of the specific packages we used include matplotlib, seaborn, and plot.ly — to create interactive visualizations! 
+
+## Research Questions 
+
+### What are recent trends in avocado prices and consumption? 
+[here](https://github.com/datares/happy-pineapples/blob/main/visualization/PCARegion.png)
+
+### How do avocado prices affect volume? 
+
+
+### Does avocado consumption correlate with overall health? 
+
+### What are the links between avocado consumption and demographic data such as age, socioeconomic status, etc.? 
+
 

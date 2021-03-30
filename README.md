@@ -4,7 +4,7 @@ Hailed in recent years as a trendy superfood, avocados have soared in popularity
 
 Team Green Tea at UCLA DataRes dove deeper into the rich data behind avocado purchases in the article "Everything You Avo Wanted to Know About Avocados". We sought to use data collected from the [Hass Avocado Board (HAB)](https://hassavocadoboard.com/) to explore and explain trends in avocado prices & consumption. We also attempted to draw links between avocado consumption and the health and demographics of a population by supplementing our analysis with data from the [U.S. Census Bureau](https://data.census.gov/cedsci/) and the [Kaiser Family Foundation (KFF)](https://www.kff.org/).  This repository contains all the code, analyses, and explanations for the visualizations and discoveries found in the aforementioned article.
 
-Contributors: [Tara Jaigopal](https://github.com/tarajaigopal), [Aarushi Gupta](https://github.com/gupta-aarushi), [Emily Ng](https://github.com/heyyitsemyy), [Tiffany Feng](https://github.com/tfeng456), [Amy Tang](https://github.com/datares/team-green-tea).
+Contributors: [Tara Jaigopal](https://github.com/tarajaigopal), [Aarushi Gupta](https://github.com/gupta-aarushi), [Emily Ng](https://github.com/heyyitsemyy), [Tiffany Feng](https://github.com/tfeng456), [Amy Tang](https://github.com/datares/team-green-tea)
 
 # The Dataset
 

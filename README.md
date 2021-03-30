@@ -56,6 +56,6 @@ To further explore the link between avocado prices and consumer behavior, we cre
 
 We sought to uncover if increased avocado consumption correlates with a healthier population. We created a bar graph describing the distribution of the population of different regions based on BMI (body mass index) level and ordered it by income, and then overlaid a line graph depicting the average avocado consumption of that region. The visualization can be found [here](https://github.com/datares/team-green-tea/blob/main/visualizations/BMI%20vs%20Avo.png). We found little to no correlation between avocado consumption and health. While the Plains and Midsouth purchased comparatively fewer avocados, their BMI levels did not substantially differ from those of the South Central, California, and West, where avocado purchases were much higher.
 
-### What are the links between avocado consumption and demographic data such as age, socioeconomic status, etc.? 
+### What are the links between avocado consumption and demographic data (age, wealth, etc.)? 
 
 Finally, we wanted to verify the myth that increased avocado consumption correlates with younger populations (specifically millennials). We created this [scatterplot](https://chart-studio.plotly.com/~tarajaigopal/15.embed), which shows the per capita consumption of avocados in various cities across the US and residents’ median age in those cities. Clearly, there is no relationship between age and avocado consumption and avocados are not just a millennial fad! 

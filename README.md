@@ -6,7 +6,7 @@ Team Green Tea at UCLA DataRes dove deeper into the rich data behind avocado pur
 
 Contributors: [Tara Jaigopal](https://github.com/tarajaigopal), [Aarushi Gupta](https://github.com/gupta-aarushi), [Emily Ng](https://github.com/heyyitsemyy), [Tiffany Feng](https://github.com/tfeng456), [Amy Tang](https://github.com/datares/team-green-tea).
 
-# Data 
+# The Dataset
 
 Before we could begin our analysis, we had to clean and collate our primary dataset, which was sourced from the Hass Avocado Board. Some of the key variables included in the dataset are:
 * `Date` - the date of the observation
@@ -30,24 +30,32 @@ A curious feature of the dataset was how different regions were grouped. While t
 
 These divisions are presumably due to similarities in demographics and access to avocados. 
 
-# Data Processing 
+# Data Cleaning
 
 Since the data sourced from the Census Bureau and Kaiser Family Foundation provided figures related to health and demographics for each U.S. state, rather than for each region, we transformed the data by using population-weighted aggregation to arrive at figures for each region. This enabled us to draw links between avocado consumption and the health and demographics of the population of each region. 
 
-# Analysis and Code
+# Data Analysis and Code
 
-Our data analysis and corresponding code can be found in our analysis folder. While we were able to choose any language or platform for our analysis, we mainly utilized R and Tableau to clean our data and create our visualizations. Hence, our analyses include both R code and Markdown files and Tableau notebooks and scripts. For R, some of the specific packages we used include plot.ly — to create interactive visualizations! 
+Our data analysis and corresponding code can be found in our analysis folder. While we were able to choose any language or platform for our analysis, we mainly utilized R and Tableau to clean our data and create our visualizations. Hence, our analyses include both R code and Markdown files and Tableau notebooks and scripts. For R, some of the specific packages we used include tidyverse, ggplot2, rvest, and plot.ly — to create interactive visualizations! 
 
 ## Research Questions 
 
 ### What are recent trends in avocado prices and consumption? 
-[here](https://github.com/datares/happy-pineapples/blob/main/visualization/PCARegion.png)
+
+First, to find out when and where we could get the best deals on avocados, we created an [interactive Tableau dashboard](http://tabsoft.co/3kwZmsD) that charted the price fluctuations from 2015 to 2020 across the US regions previously listed. We noticed that, on average, the South Central region seems to be the chepeast, while the Northeast and California seem to be the most expensive regions to buy avocados. Avocado prices also seemed to have risen sharply across the nation in 2017 but fell again and stabilized at a lower price by 2018, with overall prices consistently at their lowest in February. We also wanted to investigate the monthly fluctuations in avocado prices across the years, and thus included a [time series chart] in the dashboard. Finally, we attempted to predict avocado prices in 2021 by using Tableau’s forecast feature — the visualization can be found [here](http://tabsoft.co/2OVZIND).
+
+## Do these trends differ based on the type of avocado? 
+
+Furthermore, we wanted to investigate if these trends differed based on the type of avocado: conventional or organic. We created donut charts to depict the total proportion of both types of avocado purchased between 2015 and 2020 in each region, and we discovered that the volume of conventional avocados purchased is far greater than that of organic avocados. To figure out why this was the case, we made a [line graph](https://chart-studio.plotly.com/~tarajaigopal/11.embed) that tracks the average unit price of organic and conventional avocados over the same time period. As expected, organic avocados are more expensive than conventional avocados — due to higher farming and distribution costs — which made conventional avocados the more appealing option to consumers in all regions. Regardless, organic avocados are still hugely popular and rapidly increasing in popularity as evidenced by this [bar chart](https://chart-studio.plotly.com/~tarajaigopal/13.embed).
 
 ### How do avocado prices affect volume? 
 
+To further explore the link between avocado prices and consumer behavior, we created a [lollipop chart](https://chart-studio.plotly.com/~tarajaigopal/7.embed) using plot.ly in R. We noticed that while the volume of avocados purchased increased across all regions, only California and the West saw an increase in price — all other regions saw a reduction. We infer that this increase in price was probably why California and the West saw a relatively reduced jump in the volume of avocados purchased. Most interestingly, the region with the greatest increase in the volume of avocados purchased between 2015 and 2020 was the Southeast and the smallest was California - where avocados are almost as ubiquitous as palm trees.  
 
 ### Does avocado consumption correlate with overall health? 
 
+We sought to uncover if increased avocado consumption correlates with a healthier population. We created a bar graph describing the distribution of the population of different regions based on BMI (body mass index) level and ordered it by income, and then overlaid a line graph depicting the average avocado consumption of that region. The visualization can be found here. We found little to no correlation between avocado consumption and health. While the Plains and Midsouth purchased comparatively fewer avocados, their BMI levels did not substantially differ from those of the South Central, California, and West, where avocado purchases were much higher.
+
 ### What are the links between avocado consumption and demographic data such as age, socioeconomic status, etc.? 
 
-
+Finally, we wanted to verify the myth that increased avocado consumption correlates with younger populations (specifically millennials). We created this [scatterplot](https://chart-studio.plotly.com/~tarajaigopal/15.embed), which shows the per capita consumption of avocados in various cities across the US and residents’ median age in those cities. Clearly, there is no relationship between age and avocado consumption and avocados are not just a millennial fad! 

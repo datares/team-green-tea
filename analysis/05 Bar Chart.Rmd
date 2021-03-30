@@ -1,0 +1,95 @@
+---
+title: "05 Bar Chart"
+author: "Tara Jaigopal"
+date: "2/15/2021"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+---
+
+```{r, message=FALSE, warning=FALSE}
+# packages
+library(readr)
+library(tidyverse)
+library(plotly)
+```
+
+```{r, message=FALSE, warning=FALSE}
+# reading in primary dataset 
+avocados <- read_csv("datasets [final]/avo_combined.csv")
+
+# defining regions
+regions <- c("West","South Central","California", "Northeast","Southeast","Great Lakes","Midsouth","Plains")
+```
+
+# Bar Chart
+
+## Identifying 10 regions with highest organic avocado consumption over 5 years
+
+```{r, message=FALSE}
+organic_regions <- avocados %>% 
+  filter(Type == "organic" & !(Region %in% regions) & Region != "Total U.S.") %>%
+  group_by(Region) %>% 
+  summarize(AveragePrice = mean(AveragePrice), 
+            TotalVolume = sum(`Total Volume`)) %>% 
+  arrange(desc(TotalVolume)) %>%
+  slice(1:10) %>%
+  .$Region
+organic_regions
+```
+
+## Filtering & Summarizing
+
+```{r, message=FALSE}
+avocados_organic2 <- avocados %>%
+  mutate(Year = format(as.Date(avocados$Date, format="%Y-%m-%d"),"%Y"))
+avocados_organic2 <- avocados_organic2 %>%
+  filter(Type == "organic" & Region %in% organic_regions) %>%
+  group_by(Region, Year) %>% 
+  summarize(AveragePrice = mean(AveragePrice),
+```
+
+
+```{r, message=FALSE}
+TotalVolume = sum(`Total Volume`))
+avocados_organic2$Region <- factor(avocados_organic2$Region, 
+                                   levels = rev(c("Los Angeles", "New York",
+                                              "Seattle","Chicago","Denver", 
+                                              "Portland", "Baltimore/Washington",
+                                              "San Francisco", 
+                                              "Dallas/Ft. Worth","Houston")))
+avocados_organic2
+```
+
+## Creating Visualization
+
+```{r}
+barchart <- plot_ly(data = avocados_organic2, x = ~TotalVolume, y = ~Region,
+                    type ="bar", frame = ~Year, color =
+                      ~factor(avocados_organic2$Region, 
+                                   levels = rev(c("Los Angeles", "New York",
+                                              "Seattle","Chicago","Denver", 
+                                              "Portland", "Baltimore/Washington",
+                                              "San Francisco", 
+                                              "Dallas/Ft. Worth","Houston"))),
+                    colors = c("#8fd17f", "#82c373", "#75b567", "#68a85b",
+                               "#5b9b50", "#4e8d45", "#41813a", "#34742f", 
+                               "#276724", "#195b19"),
+                    showlegend=FALSE) %>% 
+  layout(title = "Top 10 Markets for Organic Avocados",
+         xaxis = list(title = "Number of Avocados Consumed"),
+         yaxis = list(title = "Market Region"))
+barchart
+```
+
+## Calculating Growth 
+ 
+```{r}
+100 * (avocados_organic2$TotalVolume[avocados_organic2$Region=="New York" & avocados_organic2$Year==2020] - avocados_organic2$TotalVolume[avocados_organic2$Region=="New York" & avocados_organic2$Year==2015]) /
+avocados_organic2$TotalVolume[avocados_organic2$Region=="New York" & avocados_organic2$Year==2015]
+
+100 * (avocados_organic2$TotalVolume[avocados_organic2$Region=="Los Angeles" & avocados_organic2$Year==2020] - avocados_organic2$TotalVolume[avocados_organic2$Region=="Los Angeles" & avocados_organic2$Year==2015]) /
+avocados_organic2$TotalVolume[avocados_organic2$Region=="Los Angeles" & avocados_organic2$Year==2015]
+```
+

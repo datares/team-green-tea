@@ -1,0 +1,61 @@
+---
+title: "03 Dumbbell Plot"
+author: "Tara Jaigopal"
+date: "2/15/2021"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+---
+
+```{r, message=FALSE, warning=FALSE}
+# packages
+library(readr)
+library(tidyverse)
+library(plotly)
+```
+
+```{r, message=FALSE, warning=FALSE}
+# reading in primary dataset 
+avocados <- read_csv("datasets [final]/avo_combined.csv")
+```
+
+# Dumbbell Plot 
+
+## Calculating Percent Change in Price and Volume
+
+```{r, message=FALSE}
+
+# vector of regions
+regions <- c("West","South Central","California", "Northeast","Southeast","Great Lakes","Midsouth","Plains")
+
+## adding year
+avocados <- avocados %>% mutate(Year = format(as.Date(avocados$Date, format="%Y-%m-%d"),"%Y"))
+
+## finding average price in 2015 and in 2020
+avocados2 <- avocados %>% filter(Year == 2015 | Year == 2020) %>% filter(Region %in% regions) %>% group_by(Year, Region) %>% summarise(AveragePrice = mean(AveragePrice), TotalVol = sum(`Total Volume`))
+avocados3 <- data.frame(Region = avocados2$Region[1:8], Price2015 = avocados2$AveragePrice[avocados2$Year==2015], Price2020 = avocados2$AveragePrice[avocados2$Year==2020], Vol2015 = avocados2$TotalVol[avocados2$Year==2015], Vol2020 = avocados2$TotalVol[avocados2$Year==2020]) 
+
+# calculating percent change
+avocados3 <- avocados3 %>% mutate(PricePctChange = 100*((Price2020-Price2015)/Price2015), VolPctChange = 100*((Vol2020-Vol2015)/Vol2015), start=0) 
+
+# changing region to factor
+avocados3$Region <- factor(avocados3$Region, levels = as.character(avocados3$Region[order(avocados3$VolPctChange)]))
+```
+
+## Creating Visualization
+
+```{r, warning=FALSE}
+
+dumbbell <- plot_ly(avocados3, color = I("gray80"))
+dumbbell<- dumbbell %>% 
+  add_segments(x = ~start, xend= ~PricePctChange, y= ~Region, yend = ~Region, showlegend = FALSE, color = I("#195B19")) %>% 
+  add_segments(x = ~start, xend= ~VolPctChange, y= ~Region, yend = ~Region, showlegend = FALSE, color = I("#8FD17F")) %>%
+  add_markers(x = ~PricePctChange, y = ~Region, name = "Percent Change in Price", color = I("#195B19"), size = ~abs(PricePctChange)) %>% 
+  add_markers(x = ~VolPctChange, y = ~Region, name = "Percent Change in Volume", color = I("#8FD17F"), size = ~abs(VolPctChange)) %>%
+  layout(title = "Percent Change in Price and Volume of Avocados Purchased Between 2015 and 2020",
+    xaxis = list(title = "Change in %"))
+
+
+dumbbell
+```

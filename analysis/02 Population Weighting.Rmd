@@ -1,0 +1,283 @@
+---
+title: "02 Population Weighting"
+author: "Tara Jaigopal"
+date: "2/15/2021"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+    toc: true
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(readr)
+library(tidyverse)
+```
+
+```{r, message=FALSE, warning=FALSE}
+# reading population data 
+pop2019 <- read_csv("datasets [final]/2019populationestimate.csv", skip = 1)
+
+# removing non-state data & keeping only 2019 estimates
+pop2019 <- pop2019 %>% slice(-2:-5, -7, -17, -57:-63) %>% select(1, 13)
+
+# altering region names
+state_trim <- function(state) {
+  return(substr(state, 2, length(state)))
+}
+pop2019[2:50,1] <- sapply(pop2019[2:50,1], state_trim)
+```
+
+```{r, message=FALSE, warning=FALSE}
+# reading in state abbreviation data
+state_abbr <- read_csv("datasets [final]/state_abbr.csv")
+
+# joining state abbreviations to population
+pop2019 <- left_join(pop2019, state_abbr[,c(1,3)], by = "State")
+pop2019[1, 3] <- "UW"
+
+# defining regions
+California <- c("CA")
+West <- c("WA","OR","ID","MT","WY","UT","CO","AZ","NM","NV")
+Plains <- c("SD","ND","KS","NE","MN","IA","MO")
+SouthCentral <- c("TX","OK","AR","LA")
+GreatLakes <- c("WI","IL","MI","IN","OH")
+Northeast <- c("ME","NH","VT","NY","MA","RI","CT","PA","NJ")
+Midsouth <- c("DE","MD","VA","WV","DC","KY","TN","NC")
+Southeast <- c("SC","GA","FL","AL","MS")
+TotalUS <- c("UW")
+regions <- list(California, West, Plains, SouthCentral, GreatLakes, 
+                Northeast, Midsouth, Southeast, TotalUS)
+
+# function to identify regions
+identify_region <- function(x) {
+if(x %in% California) {return("California")}
+if(x %in% West) {return("West")}
+if(x %in% Plains) {return("Plains")}
+if(x %in% SouthCentral) {return("South Central")}
+if(x %in% GreatLakes) {return("Great Lakes")}
+if(x %in% Northeast) {return("Northeast")}
+if(x %in% Midsouth) {return("Midsouth")}
+if(x %in% Southeast) {return("Southeast")}
+if(x %in% TotalUS) {return("Total U.S.")}
+}
+```
+
+## BMI 
+
+```{r, message=FALSE, warning=FALSE}
+# reading in BMI data 
+bmi_state <- read_csv("datasets [final]/bmi_state.csv")
+bmi_state <- bmi_state %>% select(3, 8, 12) %>% slice(-1:-4, -13:-16, -53:-56, -209:-227)
+# for some reason NJ is missing, but anyway
+
+
+# splitting data into multiple dataframes (one for underweight, one for normal, etc.)
+bmi_state <- split(bmi_state, bmi_state$Response)
+bmi_normal <- bmi_state[[1]] %>% rename(PctNormal = Data_Value) %>% select(3) %>% as.vector()
+bmi_obese <- bmi_state[[2]] %>% rename(PctObese = Data_Value) %>% select(3) %>% as.vector()
+bmi_over <- bmi_state[[3]] %>% rename(PctOver = Data_Value) %>% select(3) %>% as.vector()
+bmi_under <- bmi_state[[4]] %>% rename(PctUnder = Data_Value) %>% select(3) %>% as.vector()
+bmi_state2 <- data.frame(State = bmi_state[[1]]$LocationAbbr, 
+                         PctUnder = bmi_under, PctNormal = bmi_normal,
+                         PctOver = bmi_over, PctObese = bmi_obese)
+bmi_state2
+
+# adding population data 
+bmi_state2 <- merge(bmi_state2, pop2019, by.x = "State", by.y = "Code") %>% select(-"State.y")
+
+# adding region data
+bmi_state2 <- bmi_state2 %>% mutate(Region = sapply(State, identify_region))
+bmi_state2$Region <- as.character(bmi_state2$Region)
+
+
+# calculating weighted mean
+bmi_region <- bmi_state2 %>% group_by(Region) %>% 
+  summarize(PctUnder = weighted.mean(PctUnder, `2019`), 
+            PctNormal = weighted.mean(PctNormal, `2019`),
+            PctOver = weighted.mean(PctOver, `2019`), 
+            PctObese = weighted.mean(PctObese, `2019`))
+
+write_csv(bmi_region, "datasets [final]/bmi_region.csv")
+```
+
+## Age
+
+```{r, message=FALSE, warning=FALSE}
+age_state <- read_csv("datasets [final]/age_state.csv")
+age_state <- age_state %>% slice(-3, -13, -53) %>% select(-8, -9) %>% 
+  rename(State = Location)
+
+# joining abbreviations
+age_state <- left_join(age_state, state_abbr, by = "State")
+age_state <- age_state %>% select(-8)
+age_state[1, 8] <- "UW" 
+age_state <- age_state %>% select(-1) %>% rename(State = Code) %>% select(7, 1:6)
+
+# adding population data 
+age_state <- merge(age_state, pop2019, by.x = "State", by.y = "Code") %>% select(-"State.y")
+
+# adding region data 
+age_state <- age_state %>% mutate(Region = sapply(State, identify_region))
+age_state$Region <- as.character(age_state$Region)
+
+# calculating weighted mean
+age_region <- age_state %>% group_by(Region) %>% 
+  summarise(`Children 0-18` = weighted.mean(`Children 0-18`, `2019`),
+            `Adults 19-25` = weighted.mean(`Adults 19-25`, `2019`),
+            `Adults 26-34` = weighted.mean(`Adults 26-34`, `2019`),
+            `Adults 35-54` = weighted.mean(`Adults 35-54`, `2019`),
+            `Adults 55-64` = weighted.mean(`Adults 55-64`, `2019`),
+            `Seniors 65+` = weighted.mean(`65+`, `2019`)
+            )
+
+# writing a csv
+write_csv(age_region, "datasets [final]/age_region.csv")
+```
+
+## Life Expectancy (minus Michigan, Wisconsin)
+
+```{r, message=FALSE, warning=FALSE}
+lifeexpectancy_state <- read_csv("datasets [final]/lifeexpectancy_state.csv")
+lifeexpectancy_state <- lifeexpectancy_state %>% slice(-3, -13, -21, -51) %>% 
+  rename(State = Location)
+
+# joining abbreviations
+lifeexpectancy_state <- left_join(lifeexpectancy_state, state_abbr, by = "State")
+lifeexpectancy_state[1,4] <- "UW"
+lifeexpectancy_state <- lifeexpectancy_state %>% select(4, 2)
+
+# adding population data
+lifeexpectancy_state <- merge(lifeexpectancy_state, pop2019, by = "Code") %>% select(-3)
+
+# adding region data
+lifeexpectancy_state <- lifeexpectancy_state %>% mutate(Region = sapply(Code, identify_region))
+lifeexpectancy_state$Region <- as.character(lifeexpectancy_state$Region)
+lifeexpectancy_state$`Life Expectancy at Birth (years)` <- as.numeric(lifeexpectancy_state$`Life Expectancy at Birth (years)`)
+
+# calculating weighted mean
+lifeexpectancy_region <- lifeexpectancy_state %>% group_by(Region) %>%
+  summarise("Life Expectancy in Yrs" = weighted.mean(`Life Expectancy at Birth (years)`,`2019`))
+lifeexpectancy_region
+
+# writing a csv
+write_csv(lifeexpectancy_region, "datasets [final]/lifeexpectancy_region.csv")
+```
+
+## Self-reported Health Status (minus New Jersey)
+
+```{r, message=FALSE, warning=FALSE}
+selfhealth_state <- read_csv("datasets [final]/selfhealth_state.csv")
+selfhealth_state <- selfhealth_state %>% rename(State = Location)
+
+# joining abbreviations
+selfhealth_state <- left_join(selfhealth_state, state_abbr, by = "State")
+selfhealth_state[42,8] <- "UW"
+selfhealth_state <- selfhealth_state %>% select(8, 2:6)
+
+# adding population data
+selfhealth_state <- merge(selfhealth_state, pop2019, by = "Code") 
+selfhealth_state <- selfhealth_state %>% select(-7)
+
+# adding region data
+selfhealth_state <- selfhealth_state %>% mutate(Region = sapply(Code, identify_region))
+selfhealth_state$Region <- as.character(selfhealth_state$Region)
+
+# calculating weighted mean
+selfhealth_region <- selfhealth_state %>% group_by(Region) %>%
+  summarise(Poor = weighted.mean(Poor, `2019`),
+            Fair = weighted.mean(Fair, `2019`),
+            Good = weighted.mean(Good, `2019`),
+            `Very Good` = weighted.mean(`Very Good`,`2019`),
+            Excellent = weighted.mean(`Excellent`,`2019`))
+
+# writing to csv
+write_csv(selfhealth_region, "datasets [final]/selfhealth_region.csv")
+```
+
+## Diabetes (minus New Jersey)
+
+```{r, message=FALSE, warning=FALSE}
+
+diabetes_state <- read_csv("datasets [final]/diabetes_state.csv")
+diabetes_state <- diabetes_state %>% rename(State = Location)
+
+# joining abbreviations
+diabetes_state <- left_join(diabetes_state, state_abbr, by = "State")
+diabetes_state[1,7] <- "UW"
+diabetes_state <- diabetes_state %>% select(7, 2:5)
+
+# adding population data
+diabetes_state <- merge(diabetes_state, pop2019, by = "Code") 
+selfhealth_state <- selfhealth_state %>% select(-6)
+
+# adding region data
+diabetes_state <- diabetes_state %>% mutate(Region = sapply(Code, identify_region))
+diabetes_state$Region <- as.character(diabetes_state$Region)
+
+# calculating weighted mean
+diabetes_region <- diabetes_state %>% group_by(Region) %>%
+  summarise(Yes = weighted.mean(Yes, `2019`),
+            `Yes, Pregnancy-Related` = weighted.mean(`Yes, Pregnancy-Related`, `2019`),
+            No = weighted.mean(No, `2019`),
+            `No, Pre-Diabetes or Borderline Diabetes` = weighted.mean(`No, Pre-Diabetes or Borderline Diabetes`, `2019`))
+
+# write to csv
+write_csv(diabetes_region, "datasets [final]/diabetes_region.csv")
+```
+
+## Heart Disease
+
+```{r}
+heartdisease_state <- read_csv("datasets [final]/heartdisease_state.csv")
+heartdisease_state <- heartdisease_state %>% rename(State = Location) 
+
+# joining abbreviations
+heartdisease_state <- left_join(heartdisease_state, state_abbr, by = "State")
+heartdisease_state[1,4] <- "UW"
+heartdisease_state <- heartdisease_state %>% select(4,2)
+
+# adding population data
+heartdisease_state <- merge(heartdisease_state, pop2019, by = "Code") 
+heartdisease_state <- heartdisease_state %>% select(-3)
+
+# adding region data
+heartdisease_state <- heartdisease_state %>% mutate(Region = sapply(Code, identify_region))
+heartdisease_state$Region <- as.character(heartdisease_state$Region)
+
+# calculating weighted mean
+heartdisease_region <- heartdisease_state %>% group_by(Region) %>%
+  summarise(`Heart Disease Death Rate per 100,000` = weighted.mean(`Heart Disease Death Rate per 100,000`,`2019`))
+
+# writing csv
+write_csv(heartdisease_region, "datasets [final]/heartdisease_region.csv")
+```
+
+## Cholesterol (minus New Jersey)
+
+```{r, message=FALSE, warning=FALSE}
+# % of pop who have high cholesterol 
+cholesterol_state <- read_csv("datasets [final]/cholesterol_state.csv")
+cholesterol_state <- cholesterol_state %>% rename(State = Location)
+
+# joining abbreviations
+cholesterol_state <- left_join(cholesterol_state, state_abbr, by = "State")
+cholesterol_state[1,4] <- "UW"
+cholesterol_state <- cholesterol_state %>% select(4,2)
+
+# adding population data
+cholesterol_state <- merge(cholesterol_state, pop2019, by = "Code") 
+cholesterol_state <- cholesterol_state %>% select(-3)
+
+# adding region data
+cholesterol_state <- cholesterol_state %>% mutate(Region = sapply(Code, identify_region))
+cholesterol_state$Region <- as.character(cholesterol_state$Region)
+
+# calculating weighted mean
+cholesterol_region <- cholesterol_state %>% group_by(Region) %>%
+  summarise(HighCholesterol = weighted.mean(`Have Been Told That They Have High Cholesterol`,`2019`))
+
+write_csv(cholesterol_region, "datasets [final]/cholesterol_region.csv")
+```
+
+
